@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skating Coriolis (Rotating-Frame ODE)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Skating Coriolis – 回転座標系の式で積分</h1>
+    <p class="muted">
+      回転座標系（原点=CoM, 基底={t̂, r̂}）で
+      <code>r¨' = -2Ω×r˙' - Ω×(Ω×r')</code> を 0.01s 刻みで積分。
+      中点で <b>v′ を反転</b>し、「戻し」のコリオリも再現します。
+      併走で <i>no Coriolis</i>（コリオリ項を除去）も描画。
+    </p>
+
+    <form id="params" class="grid">
+      <fieldset>
+        <legend>Pattern</legend>
+        <label>Tempo (BPM)
+          <input type="number" id="bpm" value="138" step="1" />
+        </label>
+        <label>Diameter (m)
+          <input type="number" id="diameter" value="9" step="0.1" />
+        </label>
+        <label>Central angle (deg)
+          <input type="number" id="centralDeg" value="180" step="1" />
+        </label>
+        <label>Total beats on arc
+          <input type="number" id="totalBeats" value="6" step="0.5" />
+        </label>
+        <label>Rotation
+          <select id="direction">
+            <option value="ccw" selected>CCW (+ω)</option>
+            <option value="cw">CW (−ω)</option>
+          </select>
+        </label>
+        <label>Start beat (on arc)
+          <input type="number" id="startBeat" value="0" step="0.5" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Relative swing (in rotating frame)</legend>
+        <label>Swing beats (Δt in beats)
+          <input type="number" id="swingBeats" value="1" step="0.5" min="0.1" />
+        </label>
+        <label>Target amplitude A (m) <span class="hint">往路で A/2 到達、復路で原点へ</span>
+          <input type="number" id="swingAmp" value="1.0" step="0.01" />
+        </label>
+        <label>Initial offset l (m)
+          <input type="number" id="l" value="0.0" step="0.01" />
+        </label>
+        <label>Initial offset angle θ (deg) <span class="hint">t̂=0°, r̂へ+（前→外）</span>
+          <input type="number" id="theta0" value="0" step="1" />
+        </label>
+        <label>Initial velocity angle θ<sub>v</sub> (deg)
+          <input type="number" id="thetaV" value="0" step="1" />
+        </label>
+        <label>Time step h (s)
+          <input type="number" id="h" value="0.01" step="0.005" min="0.001" />
+        </label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" id="btnDutch">Dutch preset</button>
+        <button type="button" id="btnWillow">Willow preset</button>
+        <button type="submit" id="btnSimulate">Simulate</button>
+      </div>
+    </form>
+
+    <div class="canvas-row">
+      <div class="canvas-panel">
+        <h3>Absolute frame（世界座標）</h3>
+        <canvas id="canvasAbs" width="800" height="520"></canvas>
+        <div class="legend">
+          <div><span class="chip chip-com"></span>CoM（重心）</div>
+          <div><span class="chip chip-cor"></span>with Coriolis（式どおり）</div>
+          <div><span class="chip chip-nocor"></span>no Coriolis（コリオリ項なし）</div>
+        </div>
+      </div>
+
+      <div class="canvas-panel">
+        <h3>Rotating frame（CoM中心, 横=t̂, 縦=r̂）</h3>
+        <canvas id="canvasRot" width="800" height="520"></canvas>
+        <div class="legend">
+          <div><span class="chip chip-cor"></span>with Coriolis：r′(t)</div>
+          <div><span class="chip chip-nocor"></span>no Coriolis：r′(t)</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>検算（端点の横ずれ・偏角）</h2>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>T<sub>b</sub> (s)</th>
+          <th>Δt (s)</th>
+          <th>ω (rad/s)</th>
+          <th>|v′<sub>0</sub>| (m/s)</th>
+          <th>Δy (with)</th>
+          <th>Δy (no)</th>
+          <th>φ (with)</th>
+          <th>φ (no)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <details class="notes">
+      <summary>Notes / 数式</summary>
+      <ul>
+        <li>回転座標系：<code>a′ = r¨′ = -2Ω×r˙′ - Ω×(Ω×r′)</code>（定速回転）。</li>
+        <li>「戻し」は t=Δt/2 で <code>v′ ← -v′</code>。この瞬間、<code>a_cor = -2Ω×v′</code> も符号反転。</li>
+        <li>絶対座標への変換：<code>p(t)=cm(t)+r_t′(t) t̂(φ)+r_n′(t) r̂(φ)</code>、<code>φ=φ₀+ωt</code>。</li>
+      </ul>
+    </details>
+  </div>
+
+  <script defer src="./script.js"></script>
+</body>
+</html>
