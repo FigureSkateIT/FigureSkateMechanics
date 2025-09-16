@@ -111,7 +111,8 @@ function simulate(params){
 
   const v_rel0_abs = add(mul(v_t0, et0), mul(v_n0, er0));          // used for “Coriolis” path (inertial straight)
   const v_cm0_abs  = mul(omega * R, et0);                 // 重心速度（ωR t̂）
-  const v_abs0     = add(v_cm0_abs, v_rel0_abs);  
+  const v_rot0_abs = crossOmega(omega, rrel0_abs); // 回転座標系での見かけの速度（Ω×r′）
+  const v_abs0     = add(add(v_cm0_abs, v_rot0_abs), v_rel0_abs); 
 
   for(let i=0;i<=steps;i++){
     const t = Math.min(i*h, dt);
