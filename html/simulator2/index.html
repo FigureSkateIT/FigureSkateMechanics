@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skating Coriolis Simulation (Absolute & Rotating Frames)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Skating Coriolis Simulation</h1>
+    <p class="muted">
+      ・絶対座標系（左）：重心 (CoM) は等速円運動。赤＝「コリオリあり（回転系で見える）」モデルは、
+      <b>開始時の重心速度 + 開始時の相対速度</b> を一定速度として直線運動。緑＝「コリオリなし」モデルは回転系で相対速度一定→慣性系へ変換。<br/>
+      ・回転座標系（右）：CoM 中心・接線/半径基底での相対軌道。座標変換のみで描画。
+    </p>
+
+    <form id="params" class="grid">
+      <fieldset>
+        <legend>Pattern</legend>
+        <label>Tempo (BPM)
+          <input type="number" id="bpm" value="138" step="1" />
+        </label>
+        <label>Diameter (m)
+          <input type="number" id="diameter" value="9" step="0.1" />
+        </label>
+        <label>Central angle (deg)
+          <input type="number" id="centralDeg" value="180" step="1" />
+        </label>
+        <label>Total beats on arc
+          <input type="number" id="totalBeats" value="6" step="0.5" />
+        </label>
+        <label>Rotation
+          <select id="direction">
+            <option value="ccw" selected>CCW (+ω)</option>
+            <option value="cw">CW (−ω)</option>
+          </select>
+        </label>
+        <label>Start beat (on arc)
+          <input type="number" id="startBeat" value="0" step="0.5" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Swing / Relative</legend>
+        <label>Swing beats (Δt in beats)
+          <input type="number" id="swingBeats" value="1" step="0.5" />
+        </label>
+        <label>Swing amplitude (m)
+          <input type="number" id="swingAmp" value="1.0" step="0.01" />
+        </label>
+        <label>Initial offset l (m)
+          <input type="number" id="l" value="0.5" step="0.01" />
+        </label>
+        <label>Initial offset angle θ (deg)<br/><span class="hint">接線方向(前方)=0°, 半径外向きへ+（t→r）</span>
+          <input type="number" id="theta0" value="0" step="1" />
+        </label>
+        <label>Initial velocity angle θ<sub>v</sub> (deg)<br/><span class="hint">接線方向(前方)=0°, 外向きへ+</span>
+          <input type="number" id="thetaV" value="0" step="1" />
+        </label>
+        <label>Time step (s)
+          <input type="number" id="h" value="0.01" step="0.005" min="0.001" />
+        </label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" id="btnDutch">Dutch Waltz preset</button>
+        <button type="button" id="btnWillow">Willow Waltz preset</button>
+        <button type="submit" id="btnSimulate">Simulate</button>
+      </div>
+    </form>
+
+    <div class="canvas-row">
+      <div class="canvas-panel">
+        <h3>Absolute frame (world)</h3>
+        <canvas id="canvasAbs" width="800" height="520"></canvas>
+        <div class="legend">
+          <div><span class="chip chip-com"></span>CoM</div>
+          <div><span class="chip chip-cor"></span>Point（「コリオリあり」= 慣性系で直線、<b>v<sub>abs0</sub>=v<sub>cm0</sub>+v<sub>rel0</sub></b>）</div>
+          <div><span class="chip chip-nocor"></span>Point（「コリオリなし」= 回転系で相対直線 → 変換）</div>
+        </div>
+      </div>
+
+      <div class="canvas-panel">
+        <h3>Rotating frame (CoM-centered, {t̂, r̂})</h3>
+        <canvas id="canvasRot" width="800" height="520"></canvas>
+        <div class="legend">
+          <div><span class="chip chip-cor"></span>Point（相対座標に変換：赤）</div>
+          <div><span class="chip chip-nocor"></span>Point（回転系で r<sub>rel</sub>(t)=r<sub>0</sub>+v<sub>rel</sub>t：緑）</div>
+          <div class="muted">原点=CoM。横軸=接線方向 t̂、縦軸=半径方向 r̂（外向き+）。</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Computed values (theory vs simulation)</h2>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>Beat dur T<sub>b</sub> (s)</th>
+          <th>Δt (s)</th>
+          <th>ω (rad/s)</th>
+          <th>v<sub>r</sub> (m/s)</th>
+          <th>Δy<sub>theory</sub> (m)</th>
+          <th>Δy<sub>sim</sub> (m)</th>
+          <th>φ<sub>theory</sub> (deg)</th>
+          <th>φ<sub>sim</sub> (deg)</th>
+          <th>|error φ| (deg)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <details class="notes">
+      <summary>Assumptions / Notes</summary>
+      <ul>
+        <li>絶対系の「コリオリあり」モデルは、力を入れず <b>v<sub>abs0</sub>=v<sub>cm0</sub>+v<sub>rel0</sub></b> を一定として直線運動。</li>
+        <li>「コリオリなし」モデルは回転系で <b>r<sub>rel</sub>(t)=r<sub>0</sub>+v<sub>rel</sub>t</b>、それを時刻ごとの基底 {t̂,r̂} により慣性系へ変換。</li>
+        <li>理論比較：Δy=|ω| v<sub>r</sub> Δt²、φ=atan2(Δy, v<sub>r</sub>Δt)。（符号は規約依存なので大きさで比較）</li>
+      </ul>
+    </details>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
