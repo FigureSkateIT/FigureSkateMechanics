@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Skate Coriolis Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Skate Coriolis Calculator</h1>
+    <p>Calculate Coriolis and centrifugal effects in skating patterns.</p>
+
+    <!-- フォーム入力 -->
+    <form id="calc-form">
+      <label>BPM: <input type="number" id="bpm" value="138"></label>
+      <label>Diameter (m): <input type="number" id="diameter" value="9"></label>
+      <label>Central Angle (deg): <input type="number" id="centralDeg" value="180"></label>
+      <label>Total beats: <input type="number" id="totalBeats" value="6"></label>
+      <label>Swing amplitude (m): <input type="number" id="swingAmp" value="1.0"></label>
+      <label>Swing beats: <input type="number" id="swingBeats" value="1"></label>
+      <label>Mass (kg): <input type="number" id="mass" value="1"></label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <!-- 結果テーブル -->
+    <h2>Results</h2>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>Ω (rad/s)</th>
+          <th>a<sub>c</sub> (m/s²)</th>
+          <th>a<sub>cf</sub> (m/s²)</th>
+          <th>Δt (s)</th>
+          <th>v<sub>r</sub> (m/s)</th>
+          <th>Δy (m)</th>
+          <th>φ (deg)</th>
+          <th>|F<sub>c</sub>| (N)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- グラフ -->
+    <h2>Trajectory</h2>
+    <canvas id="canvas" width="500" height="500"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
