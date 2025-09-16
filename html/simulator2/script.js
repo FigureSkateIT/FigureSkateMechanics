@@ -110,6 +110,8 @@ function simulate(params){
   const p0 = add(cm0, rrel0_abs);                                  // point initial abs pos
 
   const v_rel0_abs = add(mul(v_t0, et0), mul(v_n0, er0));          // used for “Coriolis” path (inertial straight)
+  const v_cm0_abs  = mul(omega * R, et0);                 // 重心速度（ωR t̂）
+  const v_abs0     = add(v_cm0_abs, v_rel0_abs);  
 
   for(let i=0;i<=steps;i++){
     const t = Math.min(i*h, dt);
@@ -122,7 +124,7 @@ function simulate(params){
     pathCoM.push(cm);
 
     // Coriolis-view: inertial straight line with initial relative velocity
-    const p_cor = add(p0, mul(t, v_rel0_abs));
+    const p_cor = add(p0, mul(t, v_abs0));
     pathCor.push(p_cor);
 
     // no-Coriolis: carry relative position in rotating frame, then map to inertial
