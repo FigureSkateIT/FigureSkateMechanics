@@ -121,7 +121,17 @@ export const CONSTANTS = {
 | `CDK_DEPLOY_ROLE` | CDKデプロイ用IAMロール名 | `my-cdk-deploy-role` |
 | `AWS_ACCOUNT_ID` | AWSアカウントID | `123456789012` |
 
-### 2.6 デプロイの流れ
+### 2.6 html-deploy.ymlのenvを変更
+
+```yml
+  AWS_DEFAULT_REGION: ap-northeast-1
+  FRONT_DEPLOY_ROLE: YourPJName-front-deploy-role-for-github
+  SSM_S3_BUCKET: /YourPJName/front-stack/s3-bucket
+  SSM_CF_DIST_ID: /YourPJName/front-stack/cf-dist-id
+
+```
+
+### 2.7 デプロイの流れ
 
 ```mermaid
 graph LR

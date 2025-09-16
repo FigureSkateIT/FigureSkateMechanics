@@ -15,9 +15,9 @@ on:
 
 env:
   AWS_DEFAULT_REGION: ap-northeast-1
-  FRONT_DEPLOY_ROLE: htmlgame-front-deploy-role-for-github
-  SSM_S3_BUCKET: /htmlgame/front-stack/s3-bucket
-  SSM_CF_DIST_ID: /htmlgame/front-stack/cf-dist-id
+  FRONT_DEPLOY_ROLE: figureskatemechanics-front-deploy-role-for-github
+  SSM_S3_BUCKET: /figureskatemechanics/front-stack/s3-bucket
+  SSM_CF_DIST_ID: /figureskatemechanics/front-stack/cf-dist-id
 
 
 jobs:
