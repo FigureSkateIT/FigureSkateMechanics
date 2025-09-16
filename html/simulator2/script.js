@@ -52,6 +52,8 @@ $("#btnWillow").addEventListener("click", ()=>{
   $("#thetaV").value = 0;
 });
 
+function crossOmega(omega, v){ return [-omega*v[1], omega*v[0]]; }
+
 /** --------------------------
  *  Core computation
  * -------------------------- */
