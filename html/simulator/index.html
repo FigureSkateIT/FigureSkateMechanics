@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skating Coriolis Simulation (Static)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Skating Coriolis Simulation</h1>
+    <p class="muted">
+      CoM: 等速円運動。<br/>
+      “Coriolis”モデル: 慣性系で相対速度 v<sub>r</sub> を一定として質点を直線運動。<br/>
+      “no-Coriolis”モデル: 回転座標系で相対速度 v<sub>r</sub> を一定として運び、慣性系へ変換。<br/>
+      0.01 s 刻みでスイング終了まで計算・描画します。
+    </p>
+
+    <form id="params" class="grid">
+      <fieldset>
+        <legend>Pattern</legend>
+        <label>Tempo (BPM)
+          <input type="number" id="bpm" value="138" step="1" />
+        </label>
+        <label>Diameter (m)
+          <input type="number" id="diameter" value="9" step="0.1" />
+        </label>
+        <label>Central angle (deg)
+          <input type="number" id="centralDeg" value="180" step="1" />
+        </label>
+        <label>Total beats on arc
+          <input type="number" id="totalBeats" value="6" step="0.5" />
+        </label>
+        <label>Rotation
+          <select id="direction">
+            <option value="ccw" selected>CCW (+ω)</option>
+            <option value="cw">CW (−ω)</option>
+          </select>
+        </label>
+        <label>Start beat (on arc)
+          <input type="number" id="startBeat" value="0" step="0.5" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Swing</legend>
+        <label>Swing beats (Δt in beats)
+          <input type="number" id="swingBeats" value="1" step="0.5" />
+        </label>
+        <label>Swing amplitude (m)
+          <input type="number" id="swingAmp" value="1.0" step="0.01" />
+        </label>
+        <label>Initial offset l (m)
+          <input type="number" id="l" value="0.5" step="0.01" />
+        </label>
+        <label>Initial offset angle θ (deg)<br/><span class="hint">接線方向(前方)を0°、外向きに+（接線→外向きで正）</span>
+          <input type="number" id="theta0" value="0" step="1" />
+        </label>
+        <label>Initial velocity angle θ<sub>v</sub> (deg)<br/><span class="hint">接線方向(前方)を0°、外向きに+</span>
+          <input type="number" id="thetaV" value="0" step="1" />
+        </label>
+        <label>Time step (s)
+          <input type="number" id="h" value="0.01" step="0.005" min="0.001" />
+        </label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" id="btnDutch">Dutch Waltz preset</button>
+        <button type="button" id="btnWillow">Willow Waltz preset</button>
+        <button type="submit" id="btnSimulate">Simulate</button>
+      </div>
+    </form>
+
+    <div class="canvas-row">
+      <canvas id="canvas" width="800" height="520"></canvas>
+      <div class="legend">
+        <div><span class="chip chip-com"></span>CoM (center of mass)</div>
+        <div><span class="chip chip-cor"></span>Point (Coriolis view: inertial straight line)</div>
+        <div><span class="chip chip-nocor"></span>Point (no-Coriolis: carried in rotating frame)</div>
+      </div>
+    </div>
+
+    <h2>Computed values (theory vs simulation)</h2>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>Beat dur T<sub>b</sub> (s)</th>
+          <th>Δt (s)</th>
+          <th>ω (rad/s)</th>
+          <th>v<sub>r</sub> (m/s)</th>
+          <th>Δy<sub>theory</sub> (m)</th>
+          <th>Δy<sub>sim</sub> (m)</th>
+          <th>φ<sub>theory</sub> (deg)</th>
+          <th>φ<sub>sim</sub> (deg)</th>
+          <th>|error φ| (deg)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <details class="notes">
+      <summary>Assumptions / Notes</summary>
+      <ul>
+        <li>慣性系でコリオリ力は働かないため、“Coriolis”モデルの質点は <b>初期の相対速度 v<sub>r</sub> を一定</b> として <b>直線運動</b>（初期相対位置は保持）。</li>
+        <li>“no-Coriolis”モデルは、<b>回転座標系で v<sub>r</sub> 一定</b>（相対位置 r<sub>rel</sub>(t) = r<sub>rel</sub>(0) + v<sub>rel</sub> t）を仮定し、毎時刻の基底（接線・半径方向）で慣性系へ射影。</li>
+        <li>検算：初期のスイング方向を基準に、<b>並進 s = v<sub>r</sub>Δt</b> と<b>横ずれ Δy</b> を比較。理論は Δy = ω v<sub>r</sub> Δt²、φ = atan2(Δy, v<sub>r</sub>Δt)。</li>
+      </ul>
+    </details>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>

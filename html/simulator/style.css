@@ -1,0 +1,51 @@
+:root{
+  --fg:#1f2937;
+  --muted:#6b7280;
+  --panel:#ffffff;
+  --bg:#f3f4f6;
+  --line:#e5e7eb;
+  --brand:#2563eb;
+  --com:#374151;
+  --cor:#e11d48;
+  --nocor:#059669;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;}
+
+.container{max-width:1080px;margin:24px auto;padding:0 16px;}
+h1{margin:0 0 8px;}
+h2{margin:24px 0 8px;}
+.muted{color:var(--muted);margin:0 0 16px;}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+fieldset{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+legend{font-weight:600;color:#111}
+
+label{display:flex;flex-direction:column;gap:4px;font-size:14px}
+input,select,button{font-size:14px}
+input,select{
+  padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--fg);
+}
+
+.hint{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;align-items:center}
+.actions button{
+  padding:10px 14px;border:0;border-radius:10px;background:var(--brand);color:#fff;cursor:pointer
+}
+.actions button:hover{opacity:.9}
+
+.canvas-row{display:flex;gap:16px;align-items:flex-start;margin-top:16px}
+canvas{background:#fff;border:1px solid var(--line);border-radius:8px}
+.legend{display:flex;flex-direction:column;gap:8px}
+.chip{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.chip-com{background:var(--com)}
+.chip-cor{background:var(--cor)}
+.chip-nocor{background:var(--nocor)}
+
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:center;font-variant-numeric:tabular-nums}
+thead th{background:#fafafa}
+tbody tr:last-child td{border-bottom:none}
+
+.notes{margin-top:12px;color:var(--muted)}
