@@ -76,9 +76,9 @@ function computeDerived({
   const v_t0 = vr * Math.cos(toRad(thetaV));
   const v_n0 = vr * Math.sin(toRad(thetaV));
 
-    // Initial relative position components in [t_hat, e_r] basis (at phi0)
-  const r_t0 = l * Math.cos(toRad(theta0)) + v_t0;
-  const r_n0 = l * Math.sin(toRad(theta0)) + v_n0;
+// Initial relative position components in [t_hat, e_r] basis (at phi0)
+  const r_t0 = l * Math.cos(toRad(theta0));
+  const r_n0 = l * Math.sin(toRad(theta0));
 
 
   return {Tb, T, dt, omega, R, vr, phi0, r_t0, r_n0, v_t0, v_n0, h};

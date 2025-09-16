@@ -195,8 +195,12 @@ function compareTheorySim(params, sim){
  * -------------------------- */
 function drawAll(sim){
   const {pathCoM, pathCor, pathNoCor} = sim;
-  const cvs = $("#canvas");
-  const ctx = cvs.getContext("2d");
+  const cvs = document.getElementById('canvas') || document.getElementById('canvasAbs');
+  if (!cvs) {
+    console.error('Canvas element not found. Expected #canvas or #canvasAbs.');
+    return; // ここで抜ける（または throw でもOK）
+  }
+  const ctx = cvs.getContext('2d');
   ctx.clearRect(0,0,cvs.width,cvs.height);
 
   // Determine dynamic scaling (m -> px)
