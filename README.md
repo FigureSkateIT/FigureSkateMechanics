@@ -1,5 +1,8 @@
 ## 1. プロジェクト概要
 本プロジェクトは、**CloudFront + S3** による静的Webサイトホスティング構成を **AWS CDK** でコード化し、**GitHub Actions** を利用してCI/CDパイプラインを構築したものです。サンプルとしてフィギュアスケートの物理に関するWebサイトを構築しました。
+カーブを進行中のフリーレッグに働くコリオリ力のシミュレーションをしています。
+
+https://figureskatemechanics.fsitlab.com/
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
