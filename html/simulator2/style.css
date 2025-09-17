@@ -30,6 +30,12 @@ canvas{background:#fff;border:1px solid var(--line);border-radius:8px;display:bl
 .chip-coronly{background:var(--coronly)}
 .chip-both{background:var(--both)}
 
+/* Theory table */
+.table-wrap{overflow-x:auto}
+#theoryTable th,#theoryTable td{white-space:nowrap}
+.theory-section h2{margin:16px 0 8px}
+
+
 .notes{margin-top:12px;color:var(--muted)}
 
 table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:16px}

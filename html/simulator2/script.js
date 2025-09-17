@@ -3,6 +3,7 @@ import { $, num } from "./lib/dom.js";
 import { derive, integrateRot, toAbsolute } from "./lib/physics.js";
 import { drawPathsOnCanvas } from "./lib/draw.js";
 import { makeAbsProjector, mapRotRelToView } from "./lib/viewmap.js";
+import { computeTheoryRows } from "./lib/theory.js";
 
 function runOnce() {
   // 1) 入力 -> 導出パラメータ
@@ -21,6 +22,8 @@ function runOnce() {
     h:           Math.max(0.001, num("h", 0.01)),
   };
   const model = derive(paramsIn);
+
+  
 
   // 2) 回転座標で 3 モード積分
   const rot_ideal   = integrateRot(model, "ideal");    // s¨ = 0
@@ -64,6 +67,23 @@ function runOnce() {
     ],
     { grid: true, axes: true, pad: 0.2 }
   );
+
+  // 5) 理論値計算
+  const theoryRows = computeTheoryRows(
+    {
+      bpm: paramsIn.bpm,
+      diameter: paramsIn.diameter,
+      centralDeg: paramsIn.centralDeg,
+      totalBeats: paramsIn.totalBeats,
+      direction: paramsIn.direction,
+    },
+    [
+      { label: "Swing", swingBeats: paramsIn.swingBeats, swingAmp: paramsIn.swingAmp },
+    ],
+    2 // 有効数字
+  );
+  // 例：開発時は確認だけ
+  console.table(theoryRows);
 }
 
 function wirePresets() {

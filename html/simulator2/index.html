@@ -2,17 +2,17 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>Skating Coriolis – 3 Modes (no flip)</title>
+  <title>Skating Coriolis – 3 Modes (ideal,cor-only,both)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Skating Coriolis – 3 Modes</h1>
+    <h1>Skating Coriolis – 3 Modes (ideal,cor-only,both)</h1>
     <p class="muted">
-      回転座標系の式に基づく単発シミュレーション（戻しはしません）。<br/>
-      ① ideal: <code>r¨′ = 0</code>（遠心・コリオリを外力で打消す）／
-      ② cor-only: <code>r¨′ = -2Ω×r˙′</code>（遠心のみ打消す）／
+      回転座標系の式に基づく,\単発シミュレーション<br/>
+      ① ideal: <code>r¨′ = 0</code>（遠心・コリオリを外力で打消す　例：体の傾き＋フリーレッグの筋肉に力を入れる）<br/>
+      ② cor-only: <code>r¨′ = -2Ω×r˙′</code>（遠心のみ外力（重力）で打消す　例：体を傾けたとき）<br/>
       ③ both: <code>r¨′ = -2Ω×r˙′ - Ω×(Ω×r′)</code>（どちらも打消さない）
     </p>
 
@@ -93,6 +93,31 @@
         </div>
       </div>
     </div>
+
+    <section id="theory" class="theory-section">
+      <h2>Theory (Analytical Values)</h2>
+      <p class="muted">入力から計算した理論値（前方=0° 規約）</p>
+      <div class="table-wrap">
+        <table id="theoryTable">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Tb (s/beat)</th>
+              <th>T (s)</th>
+              <th>ω (rad/s)</th>
+              <th>R (m)</th>
+              <th>Δt (s)</th>
+              <th>v<sub>rel</sub> (m/s)</th>
+              <th>a<sub>cf</sub> (m/s²)</th>
+              <th>|a<sub>c</sub>| (m/s²)</th>
+              <th>Δy (m)</th>
+              <th>φ (deg)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
 
     <details class="notes">
       <summary>Notes / 数式</summary>
