@@ -39,6 +39,6 @@ canvas{background:#fff;border:1px solid var(--line);border-radius:8px;display:bl
 .notes{margin-top:12px;color:var(--muted)}
 
 table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:16px}
-th,td{border-bottom:1px solid var(--line);padding:8px;text-align:center;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;font-variant-numeric:tabular-nums}
 thead th{background:#fafafa}
 tbody tr:last-child td{border-bottom:none}
