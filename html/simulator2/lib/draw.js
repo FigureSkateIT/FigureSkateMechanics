@@ -33,10 +33,34 @@ export function drawPathsOnCanvas(canvas, paths, options = {}) {
   const W = canvas.width, H = canvas.height;
   const sx = W / Math.max(1e-9, (maxX - minX));
   const sy = H / Math.max(1e-9, (maxY - minY));
-  const s  = 0.9 * Math.min(sx, sy);
+  const s  = 0.9 * Math.min(sx, sy); // 余白
 
   const cx = W / 2 - s * ((minX + maxX) / 2);
   const cy = H / 2 + s * ((minY + maxY) / 2);
+
+  const step = 0.1; // 10cm = 0.1m
+  const startX = Math.ceil(minX / step);
+  const endX   = Math.floor(maxX / step);
+  const startY = Math.ceil(minY / step);
+  const endY   = Math.floor(maxY / step);
+
+  ctx.strokeStyle = "#a1a1a1";
+  ctx.lineWidth = 1;
+
+  for (let k = startX; k <= endX; k++) {
+    const gx = k * step;
+    ctx.beginPath();
+    ctx.moveTo(...toPx([gx, minY]));
+    ctx.lineTo(...toPx([gx, maxY]));
+    ctx.stroke();
+  }
+  for (let k = startY; k <= endY; k++) {
+    const gy = k * step;
+    ctx.beginPath();
+    ctx.moveTo(...toPx([minX, gy]));
+    ctx.lineTo(...toPx([maxX, gy]));
+    ctx.stroke();
+  }
 
   const toPx = ([x, y]) => [cx + s * x, cy - s * y];
 
