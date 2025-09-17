@@ -88,17 +88,17 @@ function runOnce() {
 }
 
 function wirePresets() {
-  $("#btnDutch")?.addEventListener("click", () => {
+  $("#btnDutchSwing")?.addEventListener("click", () => {
     $("#bpm").value = 138; $("#diameter").value = 9; $("#centralDeg").value = 180;
     $("#totalBeats").value = 6; $("#direction").value = "ccw"; $("#startBeat").value = 0;
     $("#swingBeats").value = 1; $("#swingAmp").value = 1.0;
-    $("#l").value = 0.0; $("#theta0").value = 0; $("#thetaV").value = 0;
+    $("#l").value = 0.5; $("#theta0").value = 180; $("#thetaV").value = 0;
   });
-  $("#btnWillow")?.addEventListener("click", () => {
-    $("#bpm").value = 138; $("#diameter").value = 10; $("#centralDeg").value = 270;
-    $("#totalBeats").value = 12; $("#direction").value = "ccw"; $("#startBeat").value = 0;
+  $("#btnDutchLFIStroke")?.addEventListener("click", () => {
+    $("#bpm").value = 138; $("#diameter").value = 9; $("#centralDeg").value = 270;
+    $("#totalBeats").value = 6; $("#direction").value = "ccw"; $("#startBeat").value = 0;
     $("#swingBeats").value = 0.5; $("#swingAmp").value = 0.5;
-    $("#l").value = 0.0; $("#theta0").value = 0; $("#thetaV").value = 0;
+    $("#l").value = 0; $("#theta0").value = 0; $("#thetaV").value = 180;
   });
 }
 
@@ -124,10 +124,10 @@ function renderTheoryTable(rows){
   tbody.innerHTML = rows.map(r => `
     <tr>
       <td>${r.label || "-"}</td>
+      <td>${r.f.R}</td>
       <td>${r.f.Tb}</td>
       <td>${r.f.T}</td>
       <td>${r.f.omega}</td>
-      <td>${r.f.R}</td>
       <td>${r.f.v_cm}</td>
       <td>${r.f.dt}</td>
       <td>${r.f.vrel}</td>
