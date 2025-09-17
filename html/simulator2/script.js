@@ -124,9 +124,9 @@ function renderTheoryTable(rows){
   tbody.innerHTML = rows.map(r => `
     <tr>
       <td>${r.label || "-"}</td>
-      <td>${r.f.R}</td>
       <td>${r.f.Tb}</td>
       <td>${r.f.T}</td>
+      <td>${r.f.R}</td>
       <td>${r.f.omega}</td>
       <td>${r.f.v_cm}</td>
       <td>${r.f.dt}</td>
