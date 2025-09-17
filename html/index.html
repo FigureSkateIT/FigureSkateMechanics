@@ -1,50 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Skate Coriolis Calculator</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Skating Coriolis – 3 Modes (ideal,cor-only,both)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Skate Coriolis Calculator</h1>
-    <p>Calculate Coriolis and centrifugal effects in skating patterns.</p>
+    <h1>Skating Coriolis – 3 Modes (ideal,cor-only,both)</h1>
+    <p class="muted">
+      回転座標系の式に基づく, 単発シミュレーション<br/>
+      <div class="table-wrap">
+        <table id="explainTable">
+          <tbody>
+            <tr>
+              <td>①</td>
+              <td>ideal: </td>
+              <td><code>r¨′ = 0</code></td>
+              <td>遠心力・コリオリ力を外力で打消す</td>
+              <td>例：体の傾き＋フリーレッグの筋肉に力を入れる</td>
+            </tr>
+            <tr>
+              <td>②</td>
+              <td>cor-only: </td>
+              <td><code>r¨′ = -2Ω×r˙′</code></td>
+              <td>遠心力のみ外力（重力）で打消す</td>
+              <td>例：体の傾きのみ</td>
+            </tr>
+            <tr>
+              <td>③</td>
+              <td>both: </td>
+              <td><code>r¨′ = -2Ω×r˙′ - Ω×(Ω×r′)</code></td>
+              <td>遠心力・コリオリ力どちらも打消さない</td>
+              <td>例：体まっすぐ＋フリーレッグぶらぶら</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </p>
 
-    <!-- フォーム入力 -->
-    <form id="calc-form">
-      <label>BPM: <input type="number" id="bpm" value="138"></label>
-      <label>Diameter (m): <input type="number" id="diameter" value="9.0"></label>
-      <label>Central Angle (deg): <input type="number" id="centralDeg" value="180"></label>
-      <label>Total beats: <input type="number" id="totalBeats" value="6.0"></label>
-      <label>Swing amplitude (m): <input type="number" id="swingAmp" value="1.0"></label>
-      <label>Swing beats: <input type="number" id="swingBeats" value="1.0"></label>
-      <label>Mass (kg): <input type="number" id="mass" value="1.0"></label>
-      <button type="submit">Calculate</button>
+    <form id="params" class="grid">
+      <fieldset>
+        <legend>Pattern</legend>
+        <label>Tempo (BPM)
+          <input type="number" id="bpm" value="138" step="any" />
+        </label>
+        <label>Diameter (m)
+          <input type="number" id="diameter" value="9" step="any" />
+        </label>
+        <label>Central angle (deg)
+          <input type="number" id="centralDeg" value="180" step="any" />
+        </label>
+        <label>Total beats on arc
+          <input type="number" id="totalBeats" value="6" step="any" />
+        </label>
+        <label>Rotation
+          <select id="direction">
+            <option value="ccw" selected>CCW (+ω)</option>
+            <option value="cw">CW (−ω)</option>
+          </select>
+        </label>
+        <label>Start beat (on arc)
+          <input type="number" id="startBeat" value="0" step="any" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Relative swing (rotating frame)</legend>
+        <label>Swing beats (Δt in beats)
+          <input type="number" id="swingBeats" value="1" step="any" min="0.1" />
+        </label>
+        <label>Planned travel A (m) <span class="hint">Δt で相対座標が移動する目安距離</span>
+          <input type="number" id="swingAmp" value="1.0" step="any" />
+        </label>
+        <label>Initial offset l (m)
+          <input type="number" id="l" value="0.0" step="any" />
+        </label>
+        <label>Initial offset angle θ (deg) <span class="hint">t̂=0°, r̂へ+（前→外）</span>
+          <input type="number" id="theta0" value="0" step="any" />
+        </label>
+        <label>Initial velocity angle θ<sub>v</sub> (deg)
+          <input type="number" id="thetaV" value="0" step="any" />
+        </label>
+        <label>Time step h (s)
+          <input type="number" id="h" value="0.01" step="any" min="0.001" />
+        </label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" id="btnDutchSwing">Dutch LFO Swing</button>
+        <button type="button" id="btnDutchLFIStroke">Dtuch LFI Stroke</button>
+        <button type="submit" id="btnSimulate">Simulate</button>
+      </div>
     </form>
 
-    <!-- 結果テーブル -->
-    <h2>Results</h2>
-    <table id="results">
-      <thead>
-        <tr>
-          <th>Ω (rad/s)</th>
-          <th>a<sub>c</sub> (m/s²)</th>
-          <th>a<sub>cf</sub> (m/s²)</th>
-          <th>Δt (s)</th>
-          <th>v<sub>r</sub> (m/s)</th>
-          <th>Δy (m)</th>
-          <th>φ (deg)</th>
-          <th>|F<sub>c</sub>| (N)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="canvas-row">
+      <div class="canvas-panel">
+        <h3>Absolute frame（世界座標）</h3>
+        <canvas id="canvasAbs" width="800" height="520"></canvas>
+        <div class="legend">
+          <div><span class="chip chip-com"></span>CoM</div>
+          <div><span class="chip chip-ideal"></span>ideal（遠心・コリオリ打消し）</div>
+          <div><span class="chip chip-coronly"></span>cor-only（遠心のみ打消し）</div>
+          <div><span class="chip chip-both"></span>both（打消しなし）</div>
+        </div>
+      </div>
 
-    <!-- グラフ -->
-    <h2>Trajectory</h2>
-    <canvas id="canvas" width="500" height="500"></canvas>
+      <div class="canvas-panel">
+        <h3>Rotating frame（CoM中心, 横=t̂, 縦=r̂）</h3>
+        <canvas id="canvasRot" width="800" height="520"></canvas>
+        <div class="legend">
+          <div><span class="chip chip-ideal"></span>ideal：r′(t)</div>
+          <div><span class="chip chip-coronly"></span>cor-only：r′(t)</div>
+          <div><span class="chip chip-both"></span>both：r′(t)</div>
+        </div>
+      </div>
+    </div>
+
+    <section id="theory" class="theory-section">
+      <h2>Theory (Analytical Values)</h2>
+      <p class="muted">入力から計算した理論値（前方=0° 規約）</p>
+      <div class="table-wrap">
+        <table id="theoryTable">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Tb (s/beat)</th>
+              <th>T (s)</th>
+              <th>R (m)</th>
+              <th>ω (rad/s)</th>
+              <th>v_cm (m/s)</th>
+              <th>Δt (s)</th>
+              <th>v<sub>rel</sub> (m/s)</th>
+              <th>a<sub>cf</sub> (m/s²)</th>
+              <th>|a<sub>c</sub>| (m/s²)</th>
+              <th>Δy (m)</th>
+              <th>φ (deg)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <details class="notes">
+      <summary>Notes / 数式</summary>
+      <ul>
+        <li>回転座標系：<code>a′ = r¨′ = -2Ω×r˙′ - Ω×(Ω×r′)</code>（定速回転）。</li>
+        <li>ideal：外力が <code>a_cor</code>, <code>a_cf</code> を完全に打消し → <code>r¨′=0</code>。</li>
+        <li>cor-only：外力が遠心だけ打消し → <code>r¨′=-2Ω×r˙′</code>。</li>
+        <li>both：外力なし → <code>r¨′=-2Ω×r˙′ - Ω×(Ω×r′)</code>。</li>
+        <li>絶対座標への変換：<code>p(t)=cm(t)+r_t′(t) t̂(φ)+r_n′(t) r̂(φ)</code>、<code>φ=φ₀+ωt</code>。</li>
+      </ul>
+    </details>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
