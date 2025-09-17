@@ -89,8 +89,8 @@
       </fieldset>
 
       <div class="actions">
-        <button type="button" id="btnDutchSwing">Dutch LFO Swing</button>
-        <button type="button" id="btnDutchLFIStroke">Dtuch LFI Stroke</button>
+        <button type="button" id="btnDutchSwing">Dutch RFO Swing</button>
+        <button type="button" id="btnDutchLFIStroke">Dtuch RFI Stroke</button>
         <button type="submit" id="btnSimulate">Simulate</button>
       </div>
     </form>
@@ -162,6 +162,14 @@
       </ul>
 
       <p class="muted">参考：重力加速度の大きさ <code>g ≈ 9.8 m/s²</code>（標準重力 <code>9.80665 m/s²</code>）。</p>
+
+      <h4 style="margin:12px 0 6px">仮定</h4>
+      <ul>
+        <li>重心は速さ一定の円運動をする。</li>
+        <li>フリーレッグは一定速度で運動する。加速と減速の効果は考慮しない。</li>
+        <li>コリオリ力、や遠心力を計算する際の円の中心は、カーブの曲率中心とする。</li>
+        <li>コリオリ力のみ働く状況を考えるとき、遠心力はエッジの傾きによって重力（正確には抗力のr成分）と釣り合うものとする。</li>
+      </ul>
 
       <h4 style="margin:12px 0 6px">数式解説</h4>
       <ul>
