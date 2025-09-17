@@ -20,16 +20,16 @@
       <fieldset>
         <legend>Pattern</legend>
         <label>Tempo (BPM)
-          <input type="number" id="bpm" value="138" step="1" />
+          <input type="number" id="bpm" value="138" step="any" />
         </label>
         <label>Diameter (m)
-          <input type="number" id="diameter" value="9" step="0.1" />
+          <input type="number" id="diameter" value="9" step="any" />
         </label>
         <label>Central angle (deg)
-          <input type="number" id="centralDeg" value="180" step="1" />
+          <input type="number" id="centralDeg" value="180" step="any" />
         </label>
         <label>Total beats on arc
-          <input type="number" id="totalBeats" value="6" step="0.5" />
+          <input type="number" id="totalBeats" value="6" step="any" />
         </label>
         <label>Rotation
           <select id="direction">
@@ -38,29 +38,29 @@
           </select>
         </label>
         <label>Start beat (on arc)
-          <input type="number" id="startBeat" value="0" step="0.5" />
+          <input type="number" id="startBeat" value="0" step="any" />
         </label>
       </fieldset>
 
       <fieldset>
         <legend>Relative swing (rotating frame)</legend>
         <label>Swing beats (Δt in beats)
-          <input type="number" id="swingBeats" value="1" step="0.5" min="0.1" />
+          <input type="number" id="swingBeats" value="1" step="any" min="0.1" />
         </label>
         <label>Planned travel A (m) <span class="hint">Δt で相対座標が移動する目安距離</span>
-          <input type="number" id="swingAmp" value="1.0" step="0.01" />
+          <input type="number" id="swingAmp" value="1.0" step="any" />
         </label>
         <label>Initial offset l (m)
-          <input type="number" id="l" value="0.0" step="0.01" />
+          <input type="number" id="l" value="0.0" step="any" />
         </label>
         <label>Initial offset angle θ (deg) <span class="hint">t̂=0°, r̂へ+（前→外）</span>
-          <input type="number" id="theta0" value="0" step="1" />
+          <input type="number" id="theta0" value="0" step="any" />
         </label>
         <label>Initial velocity angle θ<sub>v</sub> (deg)
-          <input type="number" id="thetaV" value="0" step="1" />
+          <input type="number" id="thetaV" value="0" step="any" />
         </label>
         <label>Time step h (s)
-          <input type="number" id="h" value="0.01" step="0.005" min="0.001" />
+          <input type="number" id="h" value="0.01" step="any" min="0.001" />
         </label>
       </fieldset>
 
