@@ -23,15 +23,17 @@ export function derive(inp) {
   const phiSpan = toRad(inp.centralDeg);
   const phi0    = (inp.startBeat / Math.max(1e-9, inp.totalBeats)) * phiSpan;
 
-  // 初期位置 s′(0) を中心原点で与える（CoM=[0,R]）
-  const r_t0_rel = inp.l * Math.cos(toRad(inp.theta0));
-  const r_n0_rel = inp.l * Math.sin(toRad(inp.theta0));
+  const sgn = Math.sign(omega) || 1; // 0°=CoM前方(進行方向)に合わせる符号
+
+  // 初期位置 s′(0)：角度は「前方=0°，外向き(r̂)が+方向」
+  const r_t0_rel = sgn * inp.l * Math.cos(toRad(inp.theta0));
+  const r_n0_rel =        inp.l * Math.sin(toRad(inp.theta0));
   const s_t0 = r_t0_rel;
   const s_n0 = R + r_n0_rel;
 
-  // 初期相対速度（回転座標成分）
-  const v_t0 = vmag * Math.cos(toRad(inp.thetaV));
-  const v_n0 = vmag * Math.sin(toRad(inp.thetaV));
+  // 初期相対速度 v′(0)：同じ角度規約（前方=0°）
+  const v_t0 = sgn * vmag * Math.cos(toRad(inp.thetaV));
+  const v_n0 =        vmag * Math.sin(toRad(inp.thetaV));
 
   return { Tb, T, dt, omega, R, phi0, s_t0, s_n0, v_t0, v_n0, vmag, h: inp.h };
 }
