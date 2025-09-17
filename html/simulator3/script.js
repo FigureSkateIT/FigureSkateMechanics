@@ -7,12 +7,9 @@ const DEG2RAD = Math.PI / 180;
 const toRad = d => d * DEG2RAD;
 
 const add = (a,b)=>[a[0]+b[0], a[1]+b[1]];
-const sub = (a,b)=>[a[0]-b[0], a[1]-b[1]];
 const mul = (s,v)=>[s*v[0], s*v[1]];
-const dot = (a,b)=>a[0]*b[0]+a[1]*b[1];
-
-const e_r = phi => [Math.cos(phi), Math.sin(phi)];      // 半径方向（外向き）
-const e_t = phi => [-Math.sin(phi), Math.cos(phi)];     // 接線方向（CCW）
+const e_r = phi => [Math.cos(phi), Math.sin(phi)];      // 半径（外向き+）
+const e_t = phi => [-Math.sin(phi), Math.cos(phi)];     // 接線（CCW 前方+）
 const crossOmega = (omega, v)=>[-omega*v[1], omega*v[0]]; // 2D: Ω×v = ω J v
 
 const $ = sel => document.querySelector(sel);
@@ -22,8 +19,19 @@ const num = (id, def=0) => {
 };
 
 /* =========================
+ *  Sign Conventions (tune here)
+ * =========================
+ * SIGN_T : 相対→絶対変換の接線成分の符号（+1 か -1）
+ * SIGN_R : 相対→絶対変換の半径成分の符号（通常 +1）
+ * SIGN_CF: 遠心項の符号（+1: +ω²s′, -1: −ω²s′）
+ */
+const SIGN_T  = -1;  // ★接線成分の符号を反転（ご指摘に合わせた修正）
+const SIGN_R  = +1;  // 半径は外向き＋のまま
+const SIGN_CF = -1;  // ★遠心力の符号を反転（ご指摘に合わせた修正）
+
+/* =========================
  *  Parameters (from UI)
- *  回転座標の原点＝円の中心 （←重要！）
+ *  回転座標の原点＝円の中心
  * ========================= */
 function derive(){
   const Tb = 60 / Math.max(1e-9, num("bpm", 138));
@@ -37,9 +45,9 @@ function derive(){
   const swingBeats = Math.max(0.1, num("swingBeats", 1));
   const swingAmp   = num("swingAmp", 1.0);
 
-  const l      = num("l", 0.0);           // CoM からの初期オフセット長
-  const theta0 = num("theta0", 0);        // その角度（t̂=0°, r̂へ＋）
-  const thetaV = num("thetaV", 0);        // 初期相対速度の角度（同上）
+  const l      = num("l", 0.0);
+  const theta0 = num("theta0", 0);
+  const thetaV = num("thetaV", 0);
   const h      = Math.max(0.001, num("h", 0.01));
 
   const T = totalBeats * Tb;
@@ -53,14 +61,13 @@ function derive(){
   const phiSpan = toRad(centralDeg);
   const phi0 = (startBeat / Math.max(1e-9,totalBeats)) * phiSpan;
 
-  // ★ 原点＝円の中心の回転座標（s′）で初期位置を与える
-  // CoM は常に [0, R]。CoM からの相対オフセット(l, θ0) を足す。
-  const r_t0_rel = l * Math.cos(toRad(theta0));  // CoM基準の接線成分
-  const r_n0_rel = l * Math.sin(toRad(theta0));  // CoM基準の半径成分
+  // 原点＝中心の回転座標 s′ の初期値
+  const r_t0_rel = l * Math.cos(toRad(theta0));  // CoM基準の接線オフセット
+  const r_n0_rel = l * Math.sin(toRad(theta0));  // CoM基準の半径オフセット
   const s_t0 = r_t0_rel;                          // 中心基準：接線
   const s_n0 = R + r_n0_rel;                      // 中心基準：半径（R を足す）
 
-  // 初期相対速度 v′(0)（回転座標の成分）
+  // 初期相対速度（回転座標成分）
   const v_t0 = vmag * Math.cos(toRad(thetaV));
   const v_n0 = vmag * Math.sin(toRad(thetaV));
 
@@ -70,9 +77,9 @@ function derive(){
 /* =========================
  *  Rotating-frame ODE (s′)
  *  mode:
- *   - "ideal"    : r¨′ = 0                       （遠心・コリオリとも外力で打消し）
- *   - "corOnly"  : r¨′ = -2Ω×r˙′                 （遠心のみ外力で打消し）
- *   - "both"     : r¨′ = -2Ω×r˙′ - Ω×(Ω×r′)     （どちらも打消さない）
+ *   - "ideal"    : r¨′ = 0
+ *   - "corOnly"  : r¨′ = -2Ω×r˙′
+ *   - "both"     : r¨′ = -2Ω×r˙′  + SIGN_CF·ω² s′
  *  数値は半陰解法（symplectic Euler）
  * ========================= */
 function integrateRot(params, mode){
@@ -84,7 +91,7 @@ function integrateRot(params, mode){
   const sns = [];  // s_n(t)
 
   let st = s_t0, sn = s_n0;  // 位置（中心基準）
-  let vt = v_t0, vn = v_n0;  // 速度（回転座標の成分）
+  let vt = v_t0, vn = v_n0;  // 速度（回転座標成分）
 
   for(let i=0; i<=steps; i++){
     const t = Math.min(i*h, dt);
@@ -92,7 +99,7 @@ function integrateRot(params, mode){
     sts.push(st);
     sns.push(sn);
 
-    if (i === steps) break; // 最終点は更新しない
+    if (i === steps) break;
 
     // 加速度（回転座標）
     let at = 0, an = 0;
@@ -105,12 +112,10 @@ function integrateRot(params, mode){
     }
 
     if (mode === "both"){
-      // a_cf = -Ω×(Ω×s′) = + ω^2 s′
-      at += (omega*omega) * st;
-      an += (omega*omega) * sn;
+      // a_cf = SIGN_CF * ω^2 s′  （SIGN_CF=-1 なら −ω²s′）
+      at += SIGN_CF * (omega*omega) * st;
+      an += SIGN_CF * (omega*omega) * sn;
     }
-
-    // ideal は at=an=0 のまま
 
     // 半陰解法（速度→位置の順）
     vt += at * h;
@@ -124,10 +129,9 @@ function integrateRot(params, mode){
 
 /* =========================
  *  Transform to absolute
- *  s′=[s_t, s_n] を絶対座標へ：
- *   p(t) = s_t t̂(φ) + s_n r̂(φ)
+ *  s′=[s_t, s_n] → p(t) = SIGN_T·s_t t̂(φ) + SIGN_R·s_n r̂(φ)
  *  CoM(t) = R r̂(φ)
- *  スケーター相対（停止フレーム）で描くなら r′=[s_t, s_n - R]
+ *  スケーター相対（停止フレーム）で描くなら r′=[s_t, s_n - R]（こちらは規約そのまま）
  * ========================= */
 function toAbsolute(params, series){
   const { time, sts, sns } = series;
@@ -135,7 +139,7 @@ function toAbsolute(params, series){
 
   const cm = [];
   const path = [];
-  const rotRel = [];  // r′=[s_t, s_n - R]（CoM基準の回転座標）
+  const rotRel = [];  // r′=[s_t, s_n - R]
 
   for(let i=0; i<time.length; i++){
     const t = time[i];
@@ -143,7 +147,7 @@ function toAbsolute(params, series){
     const et = e_t(phi), er = e_r(phi);
 
     const cm_i = mul(R, er);
-    const p_i  = add(mul(sts[i], et), mul(sns[i], er));
+    const p_i  = add(mul(SIGN_T * sts[i], et), mul(SIGN_R * sns[i], er));
     const rr_i = [ sts[i], sns[i] - R ];
 
     cm.push(cm_i);
@@ -163,7 +167,6 @@ function drawPathsOnCanvas(canvas, paths, options){
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // 有効点を収集
   const valid = p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]);
   const allPts = [];
   for (const s of paths){
@@ -179,7 +182,7 @@ function drawPathsOnCanvas(canvas, paths, options){
     return;
   }
 
-  // バウンディングとスケール
+  // bounds & scale
   let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
   for (const [x,y] of allPts){
     if (x<minX) minX=x; if (x>maxX) maxX=x;
@@ -202,7 +205,6 @@ function drawPathsOnCanvas(canvas, paths, options){
 
   const toPx = ([x,y]) => [cx + s*x, cy - s*y];
 
-  // グリッド
   if (options.grid !== false){
     ctx.strokeStyle = "#e5e7eb";
     ctx.lineWidth = 1;
@@ -214,7 +216,6 @@ function drawPathsOnCanvas(canvas, paths, options){
     }
   }
 
-  // 軸（回転座標図で便利）
   if (options.axes){
     ctx.strokeStyle = "#9ca3af";
     ctx.lineWidth = 1.5;
@@ -222,7 +223,6 @@ function drawPathsOnCanvas(canvas, paths, options){
     ctx.beginPath(); ctx.moveTo(...toPx([minX,0])); ctx.lineTo(...toPx([maxX,0])); ctx.stroke();
   }
 
-  // パス群
   for (const {points, color, lw=2} of paths){
     if (!points || points.length < 2) continue;
     ctx.beginPath();
@@ -236,7 +236,7 @@ function drawPathsOnCanvas(canvas, paths, options){
     ctx.lineWidth = lw;
     ctx.stroke();
 
-    // 始端/終端マーカー
+    // markers
     const [tx,ty] = toPx(points[0]);
     const [hx,hy] = toPx(points[points.length-1]);
     ctx.fillStyle = color;
@@ -251,14 +251,14 @@ function drawPathsOnCanvas(canvas, paths, options){
 function runOnce(){
   const params = derive();
 
-  // 回転座標で3モード積分（単発・戻し無し）
+  // 回転座標で3モード積分（戻し無し）
   const rot_ideal   = integrateRot(params, "ideal");    // r¨′=0
   const rot_coronly = integrateRot(params, "corOnly");  // r¨′=-2Ω×r˙′
-  const rot_both    = integrateRot(params, "both");     // r¨′=-2Ω×r˙′ - Ω×(Ω×r′)
+  const rot_both    = integrateRot(params, "both");     // r¨′=-2Ω×r˙′ + SIGN_CF·ω² s′
 
   const nSwing = rot_ideal.time.length;
 
-  // 絶対座標へ変換（0〜Δt のみ描画）
+  // 絶対座標へ（0〜Δt）
   const abs_ideal   = toAbsolute(params, rot_ideal);
   const abs_coronly = toAbsolute(params, rot_coronly);
   const abs_both    = toAbsolute(params, rot_both);
@@ -268,6 +268,7 @@ function runOnce(){
   const pCor = abs_coronly.path.slice(0, nSwing);
   const pBoth= abs_both.path.slice(0, nSwing);
 
+  // 左：絶対座標
   drawPathsOnCanvas(
     document.getElementById("canvasAbs"),
     [
@@ -301,7 +302,6 @@ function init(){
     form.addEventListener("submit", (e)=>{ e.preventDefault(); runOnce(); });
     form.dispatchEvent(new Event("submit"));
   } else {
-    // フォームが無い（読み込み順の問題）場合は遅延
     document.addEventListener("DOMContentLoaded", ()=>{
       const f = document.getElementById("params");
       if (f){
@@ -312,7 +312,6 @@ function init(){
   }
 }
 
-// 即時初期化（defer推奨だが保険として）
 if (document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", init);
 } else {
