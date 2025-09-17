@@ -8,8 +8,9 @@ const add = (a,b)=>[a[0]+b[0], a[1]+b[1]];
 const mul = (s,v)=>[s*v[0], s*v[1]];
 const e_r = phi => [Math.cos(phi), Math.sin(phi)];      // 半径（外向き+）
 const e_t = phi => [-Math.sin(phi), Math.cos(phi)];     // 接線（CCW 前向き+）
-// 2D: Ω×v = ω J v,  J[x,y]=[-y,x]
-const crossOmega = (omega, v)=>[-omega*v[1], omega*v[0]];
+
+// ★ 回転基底(t, r)での Ω× の写像： [vt, vn] -> [ ω*vn, -ω*vt ]
+const crossTR = (omega, vTR)=>[ omega*vTR[1], -omega*vTR[0] ];
 
 const $ = sel => document.querySelector(sel);
 const num = (id, def=0) => {
@@ -30,9 +31,9 @@ function derive(){
   const swingBeats = Math.max(0.1, num("swingBeats", 1));
   const swingAmp   = num("swingAmp", 1.0);
 
-  const l      = num("l", 0.0);     // CoM からの初期オフセット長
-  const theta0 = num("theta0", 0);  // その角度（t̂=0°, r̂へ＋）
-  const thetaV = num("thetaV", 0);  // 初期相対速度の角度（同規約）
+  const l      = num("l", 0.0);
+  const theta0 = num("theta0", 0);
+  const thetaV = num("thetaV", 0);
   const h      = Math.max(0.001, num("h", 0.01));
 
   const T = totalBeats * Tb;
@@ -41,16 +42,17 @@ function derive(){
   const R = diameter / 2;
 
   const dt = swingBeats * Tb;
-  const vmag = swingAmp / dt; // Δt で相対移動 A の目安
+  const vmag = swingAmp / dt;
 
   const phiSpan = toRad(centralDeg);
   const phi0 = (startBeat / Math.max(1e-9,totalBeats)) * phiSpan;
 
-  // ★原点＝円の中心。CoM は常に R r̂(φ)。初期の質点は：
-  const r_t0_rel = l * Math.cos(toRad(theta0));  // CoM基準の接線オフセット
-  const r_n0_rel = l * Math.sin(toRad(theta0));  // CoM基準の半径オフセット
-  const s_t0 = r_t0_rel;                          // 中心基準：接線
-  const s_n0 = R + r_n0_rel;                      // 中心基準：半径（R を足す）
+  // 原点＝円の中心。CoM は常に R r̂(φ)。
+  // CoM からの初期オフセット(l,θ0)を中心基準へ：s(0) = [s_t0, s_n0]
+  const r_t0_rel = l * Math.cos(toRad(theta0));   // 接線方向
+  const r_n0_rel = l * Math.sin(toRad(theta0));   // 半径方向
+  const s_t0 = r_t0_rel;
+  const s_n0 = R + r_n0_rel;
 
   // 初期相対速度（回転座標の成分）
   const v_t0 = vmag * Math.cos(toRad(thetaV));
@@ -63,7 +65,7 @@ function derive(){
    mode:
     - "ideal"    : s¨ = 0
     - "corOnly"  : s¨ = -2Ω×s˙
-    - "both"     : s¨ = -2Ω×s˙ - Ω×(Ω×s)   // = -2Ω×s˙ + ω² s
+    - "both"     : s¨ = -2Ω×s˙ - Ω×(Ω×s) = -2Ω×s˙ + ω² s
    数値は半陰解法（symplectic Euler）
 ============================================= */
 function integrateRot(params, mode){
@@ -85,16 +87,16 @@ function integrateRot(params, mode){
 
     if (i === steps) break;
 
-    // 加速度
+    // 加速度（回転座標）
     let at = 0, an = 0;
 
     if (mode === "corOnly" || mode === "both"){
-      const wv = crossOmega(omega, [vt, vn]); // Ω×s˙
+      const wv = crossTR(omega, [vt, vn]); // Ω×s˙
       at += -2 * wv[0];
       an += -2 * wv[1];
     }
     if (mode === "both"){
-      // -Ω×(Ω×s) = +ω² s（外向き）
+      // -Ω×(Ω×s) = +ω² s
       at += (omega*omega) * st;
       an += (omega*omega) * sn;
     }
@@ -129,7 +131,7 @@ function toAbsolute(params, series){
     const et = e_t(phi), er = e_r(phi);
 
     const cm_i = mul(R, er);
-    const p_i  = add(mul(sts[i], et), mul(sns[i], er));  // ★符号反転なし・二重加算なし
+    const p_i  = add(mul(sts[i], et), mul(sns[i], er));
     const rr_i = [ sts[i], sns[i] - R ];
 
     cm.push(cm_i);
@@ -146,9 +148,10 @@ function drawPathsOnCanvas(canvas, paths, options){
 
   const valid = p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]);
   const all=[]; for(const s of paths){ if(!s||!Array.isArray(s.points)) continue;
-    for(const p of s.points){ if(valid(p)) all.push(p); } }
+    for(const p of s.points){ if(valid(p)) allPtsPush(all, p); } }
   if(all.length<2){ ctx.fillStyle="#9ca3af"; ctx.fillText("No data",12,20); return; }
 
+  // bounds
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   for(const [x,y] of all){ if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; }
   const spanX=Math.max(1e-9,maxX-minX), spanY=Math.max(1e-9,maxY-minY);
@@ -177,7 +180,7 @@ function drawPathsOnCanvas(canvas, paths, options){
   }
 
   for(const {points,color,lw=2} of paths){
-    if(points.length<2) continue;
+    if(!points || points.length<2) continue;
     ctx.beginPath(); const [x0,y0]=toPx(points[0]); ctx.moveTo(x0,y0);
     for(let i=1;i<points.length;i++){ const [x,y]=toPx(points[i]); ctx.lineTo(x,y); }
     ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.stroke();
@@ -188,19 +191,21 @@ function drawPathsOnCanvas(canvas, paths, options){
     ctx.beginPath(); ctx.arc(hx,hy,4,0,Math.PI*2); ctx.fill();
   }
 }
+// 小ユーティリティ（速度）
+function allPtsPush(arr, p){ arr.push(p); }
 
 /* ========= Main ========= */
 function runOnce(){
   const params = derive();
 
-  // 回転座標で3モード積分
+  // 回転座標で3モード積分（戻し無し）
   const rot_ideal   = integrateRot(params, "ideal");    // s¨=0
   const rot_coronly = integrateRot(params, "corOnly");  // s¨=-2Ω×s˙
   const rot_both    = integrateRot(params, "both");     // s¨=-2Ω×s˙ - Ω×(Ω×s)
 
   const n = rot_ideal.time.length;
 
-  // 絶対へ変換（0〜Δt）
+  // 絶対へ（0〜Δt）
   const abs_ideal   = toAbsolute(params, rot_ideal);
   const abs_coronly = toAbsolute(params, rot_coronly);
   const abs_both    = toAbsolute(params, rot_both);
@@ -209,10 +214,10 @@ function runOnce(){
   drawPathsOnCanvas(
     document.getElementById("canvasAbs"),
     [
-      {points: abs_ideal.cm.slice(0,n),   color:"#374151", lw:2}, // CoM
-      {points: abs_ideal.path.slice(0,n), color:"#10b981", lw:2}, // ideal
-      {points: abs_coronly.path.slice(0,n), color:"#a855f7", lw:2}, // cor-only
-      {points: abs_both.path.slice(0,n),  color:"#ef4444", lw:2}, // both
+      {points: abs_ideal.cm.slice(0,n),        color:"#374151", lw:2}, // CoM
+      {points: abs_ideal.path.slice(0,n),      color:"#10b981", lw:2}, // ideal
+      {points: abs_coronly.path.slice(0,n),    color:"#a855f7", lw:2}, // cor-only
+      {points: abs_both.path.slice(0,n),       color:"#ef4444", lw:2}, // both
     ],
     { grid:true, pad:0.5 }
   );
@@ -221,9 +226,9 @@ function runOnce(){
   drawPathsOnCanvas(
     document.getElementById("canvasRot"),
     [
-      {points: abs_ideal.rotRel.slice(0,n),   color:"#10b981", lw:2},
-      {points: abs_coronly.rotRel.slice(0,n), color:"#a855f7", lw:2},
-      {points: abs_both.rotRel.slice(0,n),    color:"#ef4444", lw:2},
+      {points: abs_ideal.rotRel.slice(0,n),    color:"#10b981", lw:2},
+      {points: abs_coronly.rotRel.slice(0,n),  color:"#a855f7", lw:2},
+      {points: abs_both.rotRel.slice(0,n),     color:"#ef4444", lw:2},
     ],
     { grid:true, axes:true, pad:0.2 }
   );
@@ -248,5 +253,4 @@ if (document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", init);
 } else {
   init();
-
 }
