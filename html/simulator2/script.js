@@ -84,6 +84,7 @@ function runOnce() {
   );
   // 例：開発時は確認だけ
   console.table(theoryRows);
+  renderTheoryTable(theoryRows);
 }
 
 function wirePresets() {
@@ -114,4 +115,26 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {
   init();
+}
+
+
+function renderTheoryTable(rows){
+  const tbody = document.querySelector("#theoryTable tbody");
+  if (!tbody) return;
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.label || "-"}</td>
+      <td>${r.f.Tb}</td>
+      <td>${r.f.T}</td>
+      <td>${r.f.omega}</td>
+      <td>${r.f.R}</td>
+      <td>${r.f.v_cm}</td>
+      <td>${r.f.dt}</td>
+      <td>${r.f.vrel}</td>
+      <td>${r.f.a_cf}</td>
+      <td>${r.f.a_c}</td>
+      <td>${r.f.drift}</td>
+      <td>${r.f.devDeg}</td>
+    </tr>
+  `).join("");
 }

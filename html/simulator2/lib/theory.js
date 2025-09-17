@@ -40,8 +40,10 @@ export function computeTheoryBase(inp) {
   const wMag = safeDiv(phiSpanRad, Math.max(1e-12, T));   // |ω|
   const omega = (direction === "cw" ? -1 : 1) * wMag;     // 符号つき
   const R = (inp.diameter ?? 9) / 2;                      // m
+  const omegaAbs = Math.abs(omega);
+  const v_cm = omegaAbs * R;                               // ★ CoM速度（大きさ）
 
-  return { Tb, T, omega, omegaAbs: Math.abs(omega), R, phiSpanRad };
+  return { Tb, T, omega, omegaAbs, R, v_cm, phiSpanRad };
 }
 
 /**
@@ -63,7 +65,7 @@ export function computeTheoryRow(base, caseSpec, sig = 2) {
   return {
     label: caseSpec.label ?? "",
     // raw
-    Tb: base.Tb, T: base.T, omega: base.omega, omegaAbs: base.omegaAbs, R: base.R,
+    Tb: base.Tb, T: base.T, omega: base.omega, omegaAbs: base.omegaAbs, R: base.R,v_cm: base.v_cm,   
     dt, vrel, a_cf, a_c, drift, devDeg, F_c,
     // display
     f: {
@@ -71,6 +73,7 @@ export function computeTheoryRow(base, caseSpec, sig = 2) {
       T: fmt(base.T, sig),
       omega: fmt(base.omega, sig),
       R: fmt(base.R, sig),
+      v_cm: fmt(base.v_cm, sig), 
       dt: fmt(dt, sig),
       vrel: fmt(vrel, sig),
       a_cf: fmt(a_cf, sig),
