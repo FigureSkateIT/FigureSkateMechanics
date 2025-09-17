@@ -52,21 +52,27 @@ export function drawPathsOnCanvas(canvas, paths, options = {}) {
     const startY = Math.ceil(minY / step);
     const endY   = Math.floor(maxY / step);
 
-    ctx.strokeStyle = "#e5e7eb";
-    ctx.lineWidth = 1;
+    // 1mごとのメジャー線（stepに依存して自動算出）
+    const majorEvery = Math.max(1, Math.round(1 / step)); // 例: step=0.1 → 10本ごと
 
     for (let k = startX; k <= endX; k++) {
       const gx = k * step;
+      const isMajor = ((k % majorEvery) + majorEvery) % majorEvery === 0;
       ctx.beginPath();
       ctx.moveTo(...toPx([gx, minY]));
       ctx.lineTo(...toPx([gx, maxY]));
+      ctx.strokeStyle = isMajor ? "#cbd5e1" : "#e5e7eb"; // 少し濃い
+      ctx.lineWidth   = isMajor ? 1.5 : 1;
       ctx.stroke();
     }
     for (let k = startY; k <= endY; k++) {
       const gy = k * step;
+      const isMajor = ((k % majorEvery) + majorEvery) % majorEvery === 0;
       ctx.beginPath();
       ctx.moveTo(...toPx([minX, gy]));
       ctx.lineTo(...toPx([maxX, gy]));
+      ctx.strokeStyle = isMajor ? "#cbd5e1" : "#e5e7eb";
+      ctx.lineWidth   = isMajor ? 1.5 : 1;
       ctx.stroke();
     }
   }
