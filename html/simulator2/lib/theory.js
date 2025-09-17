@@ -66,7 +66,7 @@ export function computeTheoryRow(base, caseSpec, sig = 2) {
     label: caseSpec.label ?? "",
     // raw
     Tb: base.Tb, T: base.T, omega: base.omega, omegaAbs: base.omegaAbs, R: base.R,v_cm: base.v_cm,   
-    dt, vrel, a_cf, a_c, drift, devDeg, F_c,
+    dt, vrel, a_cf, a_c, drift, devDeg,
     // display
     f: {
       Tb: fmt(base.Tb, sig),
