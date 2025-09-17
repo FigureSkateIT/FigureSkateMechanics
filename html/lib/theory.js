@@ -9,7 +9,7 @@ function safeDiv(a, b, fallback = 0) {
 }
 
 // 任意桁の有効数字丸め（表示用）
-export function roundSig(x, sig = 3) {
+export function roundSig(x, sig = 2) {
   if (!isFinite(x) || x === 0) return 0;
   const neg = x < 0 ? -1 : 1;
   x = Math.abs(x);
@@ -18,7 +18,7 @@ export function roundSig(x, sig = 3) {
   return neg * Math.round(x * f) / f;
 }
 
-export function fmt(x, sig = 3) {
+export function fmt(x, sig = 2) {
   const r = roundSig(x, sig);
   return (Math.abs(r) < 1e-12 ? 0 : r).toString();
 }

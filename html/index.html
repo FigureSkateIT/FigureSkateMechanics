@@ -145,6 +145,23 @@
     </section>
 
     <details class="notes">
+      <h4 style="margin:12px 0 6px">Theory（表の列）のパラメータ説明</h4>
+      <ul>
+        <li><code>Tb</code>：1拍の時間 [s]（<code>Tb = 60 / BPM</code>）</li>
+        <li><code>T</code>：カーブ全体の時間 [s]（<code>T = totalBeats × Tb</code>）</li>
+        <li><code>ω</code>：角速度 [rad/s]（符号付き：CCW=＋, CW=−。<code>|ω| = φ<span style="font-size:0.9em">span</span> / T</code>）</li>
+        <li><code>R</code>：軌道半径 [m]（<code>R = diameter / 2</code>）</li>
+        <li><code>v_cm</code>：重心速度の大きさ [m/s]（<code>v_cm = |ω| · R</code>）</li>
+        <li><code>Δt</code>：スイング時間 [s]（<code>Δt = swingBeats × Tb</code>）</li>
+        <li><code>v_rel</code>：相対速度の大きさ [m/s]（<code>v_rel = swingAmp / Δt</code>）</li>
+        <li><code>a_cf</code>：遠心加速度 [m/s²]（<code>a_cf = ω² · R</code>）</li>
+        <li><code>|a_c|</code>：コリオリ加速度の大きさ [m/s²]（<code>|a_c| = 2 |ω| · v_rel</code>）</li>
+        <li><code>Δy</code>：横ずれ量 [m]（<code>Δy = ½ · |a_c| · Δt²</code>）</li>
+        <li><code>φ</code>：偏角 [deg]（<code>φ = atan(Δy / swingAmp)</code> を度に換算）</li>
+      </ul>
+
+      <p class="muted">参考：重力加速度の大きさ <code>g ≈ 9.8 m/s²</code>（標準重力 <code>9.80665 m/s²</code>）。</p>
+
       <summary>Notes / 数式</summary>
       <ul>
         <li>回転座標系：<code>a′ = r¨′ = -2Ω×r˙′ - Ω×(Ω×r′)</code>（定速回転）。</li>
