@@ -1,10 +1,11 @@
-// script.js  (type="module" で読み込む)
+// script.js  (必ず <script type="module" src="./script.js"> で読み込む)
 import { $, num } from "./lib/dom.js";
 import { derive, integrateRot, toAbsolute } from "./lib/physics.js";
 import { drawPathsOnCanvas } from "./lib/draw.js";
+import { makeAbsProjector, mapRotRelToView } from "./lib/viewmap.js";
 
 function runOnce() {
-  // 入力取得（最低限ここだけメインに残す）
+  // 1) 入力 -> 導出パラメータ
   const paramsIn = {
     bpm:         num("bpm", 138),
     diameter:    num("diameter", 9),
@@ -19,39 +20,47 @@ function runOnce() {
     thetaV:      num("thetaV", 0),
     h:           Math.max(0.001, num("h", 0.01)),
   };
+  const model = derive(paramsIn);
 
-  // 導出量 → 3モード計算
-  const model       = derive(paramsIn);                  // 円中心原点の回転座標系
-  const rot_ideal   = integrateRot(model, "ideal");      // s¨ = 0
-  const rot_coronly = integrateRot(model, "corOnly");    // s¨ = -2Ω×s˙
-  const rot_both    = integrateRot(model, "both");       // s¨ = -2Ω×s˙ - Ω×(Ω×s)
-
+  // 2) 回転座標で 3 モード積分
+  const rot_ideal   = integrateRot(model, "ideal");    // s¨ = 0
+  const rot_coronly = integrateRot(model, "corOnly");  // s¨ = -2Ω×s˙
+  const rot_both    = integrateRot(model, "both");     // s¨ = -2Ω×s˙ - Ω×(Ω×s)
   const n = rot_ideal.time.length;
 
-  // 絶対座標へ
+  // 3) 絶対座標へ（ワールド座標）→ ビュー射影（t0を上方向、内側を右方向）
   const abs_ideal   = toAbsolute(model, rot_ideal);
   const abs_coronly = toAbsolute(model, rot_coronly);
   const abs_both    = toAbsolute(model, rot_both);
 
-  // 左：絶対座標（0〜Δtのみ）
+  const projectAbs = makeAbsProjector(model); // 上=初期接線, 右=内側（ωで自動切替）
+  const absCoM   = projectAbs(abs_ideal.cm.slice(0, n));
+  const absId    = projectAbs(abs_ideal.path.slice(0, n));
+  const absCor   = projectAbs(abs_coronly.path.slice(0, n));
+  const absBoth  = projectAbs(abs_both.path.slice(0, n));
+
   drawPathsOnCanvas(
     document.getElementById("canvasAbs"),
     [
-      { points: abs_ideal.cm.slice(0, n),        color: "#374151", lw: 2 }, // CoM
-      { points: abs_ideal.path.slice(0, n),      color: "#10b981", lw: 2 }, // ideal
-      { points: abs_coronly.path.slice(0, n),    color: "#a855f7", lw: 2 }, // cor-only
-      { points: abs_both.path.slice(0, n),       color: "#ef4444", lw: 2 }, // both
+      { points: absCoM,  color: "#374151", lw: 2 },  // CoM
+      { points: absId,   color: "#10b981", lw: 2 },  // ideal
+      { points: absCor,  color: "#a855f7", lw: 2 },  // cor-only
+      { points: absBoth, color: "#ef4444", lw: 2 },  // both
     ],
     { grid: true, pad: 0.5 }
   );
 
-  // 右：回転座標（スケーター相対 r′=[s_t, s_n - R]）
+  // 4) 相対座標ビュー（重心は静止・上=前方、右=内側。各時刻を初期基底へ逆回転してから描画）
+  const relId   = mapRotRelToView(rot_ideal,   model).slice(0, n);
+  const relCor  = mapRotRelToView(rot_coronly, model).slice(0, n);
+  const relBoth = mapRotRelToView(rot_both,    model).slice(0, n);
+
   drawPathsOnCanvas(
     document.getElementById("canvasRot"),
     [
-      { points: abs_ideal.rotRel.slice(0, n),    color: "#10b981", lw: 2 },
-      { points: abs_coronly.rotRel.slice(0, n),  color: "#a855f7", lw: 2 },
-      { points: abs_both.rotRel.slice(0, n),     color: "#ef4444", lw: 2 },
+      { points: relId,   color: "#10b981", lw: 2 },
+      { points: relCor,  color: "#a855f7", lw: 2 },
+      { points: relBoth, color: "#ef4444", lw: 2 },
     ],
     { grid: true, axes: true, pad: 0.2 }
   );
