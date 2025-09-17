@@ -96,7 +96,7 @@ function wirePresets() {
   });
   $("#btnDutchLFIStroke")?.addEventListener("click", () => {
     $("#bpm").value = 138; $("#diameter").value = 9; $("#centralDeg").value = 270;
-    $("#totalBeats").value = 6; $("#direction").value = "ccw"; $("#startBeat").value = 0;
+    $("#totalBeats").value = 6; $("#direction").value = "cw"; $("#startBeat").value = 0;
     $("#swingBeats").value = 0.5; $("#swingAmp").value = 0.5;
     $("#l").value = 0; $("#theta0").value = 0; $("#thetaV").value = 180;
   });
